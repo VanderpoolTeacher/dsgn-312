@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 380" width="900" height="380" role="img" aria-label="Two cross sections of a box wrapping a product: the first drawn to the exact product width and failing to close, the second with one caliper added per fold and closing">
+  <title>Caliper allowance — a panel has to travel around its own board</title>
+  <rect width="900" height="380" fill="#ffffff"/>
+  <text x="450" y="34" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="11" letter-spacing="1.4" fill="#565c66">SAME PRODUCT · SAME BOARD · ONE DIFFERENCE</text>
+
+  <!-- LEFT: exact -->
+  <text x="230" y="76" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="12" letter-spacing="1.2" fill="#8a3d2f">PANEL = PRODUCT WIDTH</text>
+  <rect x="150" y="120" width="160" height="110" fill="#eef1ee" stroke="#c3c9c2" stroke-width="1"/>
+  <text x="230" y="180" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#8b9199">product</text>
+  <!-- board wrapping, too short -->
+  <g stroke="#171a22" stroke-width="7" fill="none" stroke-linecap="square">
+    <path d="M150 112 L310 112"/>
+    <path d="M143 120 L143 230"/>
+    <path d="M317 120 L317 230"/>
+    <path d="M150 238 L268 238"/>
+  </g>
+  <line x1="272" y1="238" x2="310" y2="238" stroke="#8a3d2f" stroke-width="7" stroke-dasharray="4 6"/>
+  <text x="330" y="243" font-family="ui-monospace, Menlo, monospace" font-size="11.5" fill="#8a3d2f">GAP</text>
+  <text x="230" y="286" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#8a3d2f">It does not close.</text>
+  <text x="230" y="308" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#8b9199">The board occupied the space.</text>
+
+  <!-- RIGHT: allowed -->
+  <text x="640" y="76" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="12" letter-spacing="1.2" fill="#2f6b4f">PANEL = PRODUCT + 1 CALIPER PER FOLD</text>
+  <rect x="560" y="120" width="160" height="110" fill="#eef1ee" stroke="#c3c9c2" stroke-width="1"/>
+  <text x="640" y="180" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#8b9199">product</text>
+  <g stroke="#171a22" stroke-width="7" fill="none" stroke-linecap="square">
+    <path d="M556 112 L724 112"/>
+    <path d="M549 120 L549 234"/>
+    <path d="M731 120 L731 234"/>
+    <path d="M556 242 L724 242"/>
+  </g>
+  <text x="640" y="286" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#2f6b4f">It closes.</text>
+  <text x="640" y="308" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#8b9199">Each fold was given its thickness.</text>
+
+  <line x1="60" y1="340" x2="840" y2="340" stroke="#e3e6e0" stroke-width="1"/>
+  <text x="450" y="364" text-anchor="middle" font-family="Charter, Georgia, serif" font-size="16" fill="#171a22">A tuck flap needs roughly two calipers, or it meets the opposite edge and has nothing to enter.</text>
+</svg>

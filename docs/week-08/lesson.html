@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI as a design tool, and where it fails &middot; DSGN 312</title>
+<link rel="stylesheet" href="../style.css?v=518163b1">
+</head>
+<body>
+<header class="bar">
+  <a class="home" href="../index.html"><b>DSGN 312</b> <span>Packaging Design</span></a>
+</header>
+<main>
+<nav class="crumb"><a href="../index.html">All weeks</a><span>/</span><a href="index.html">Week 8</a><span>/</span><em>Lesson</em></nav>
+<article class="doc"><h1 id="ai-as-a-design-tool-and-where-it-fails">AI as a design tool, and
+where it fails</h1>
+<p><strong>DSGN 312 · Week 8 · Read this before the session — about 30
+minutes</strong></p>
+<p>Terms follow the <a
+href="../reference/glossary.html">Glossary</a>.</p>
+<hr />
+<h2 id="what-this-week-is-actually-assessing">What this week is actually
+assessing</h2>
+<p>Read the outcome carefully:</p>
+<blockquote>
+<p><strong>Use AI-assisted tools to generate or visualize packaging
+concepts, while critically evaluating their outputs.</strong></p>
+</blockquote>
+<p><strong>The whole outcome lives in the second half of that
+sentence.</strong></p>
+<p>Generating an image requires no judgment. A folder of striking
+concepts proves you have access to a tool. What is being assessed is
+whether you can look at an impressive output and say, specifically,
+<strong>what is wrong with it</strong> — in a way somebody else can
+verify.</p>
+<hr />
+<h2 id="prompts-that-specify-structure">Prompts that specify
+structure</h2>
+<p>Most people write style prompts. <em>"Sustainable packaging for a
+candle, beautiful, minimal, earthy."</em></p>
+<p>You will get something attractive and structurally meaningless —
+because nothing in that sentence describes an object that can be
+made.</p>
+<p><strong>A structural prompt names things a manufacturer would
+need:</strong></p>
+<ul>
+<li><strong>A form</strong> — straight tuck box, sleeve over tray, tray
+and lid</li>
+<li><strong>A material with a weight</strong> — 350 gsm uncoated
+board</li>
+<li><strong>A closure</strong> — tuck flap, magnetic, friction fit</li>
+<li><strong>Panel count and proportion</strong></li>
+<li><strong>What is printed on which panel</strong></li>
+</ul>
+<p>Compare:</p>
+<blockquote>
+<p><em>"Eco-friendly packaging for a soap bar, natural,
+artisanal"</em></p>
+</blockquote>
+<blockquote>
+<p><em>"A straight tuck box for a 90×60×25 mm soap bar, 350 gsm uncoated
+kraft, tuck flap top and bottom, one glue tab, product name on the front
+panel, ingredients on the back"</em></p>
+</blockquote>
+<p>The second gets you something you can argue with. <strong>That is the
+point</strong> — an output you can argue with is an output you can
+evaluate.</p>
+<hr />
+<h2 id="what-these-tools-are-reliably-wrong-about">What these tools are
+reliably wrong about</h2>
+<p>You are given the categories because the week is short. Look for
+these:</p>
+<h3 id="structures-that-cannot-fold-flat">Structures that cannot fold
+flat</h3>
+<p>The most common failure. Generated packaging routinely shows forms
+that could not be cut from one sheet — panels that would need to occupy
+the same space, folds going in impossible directions, a box that is a
+rendering of a box rather than a foldable object.</p>
+<h3 id="flaps-and-tabs-with-nowhere-to-go">Flaps and tabs with nowhere
+to go</h3>
+<p>A tuck flap drawn with no slot to tuck into. A glue tab on a face
+that is covered at that point in assembly. These look completely
+convincing.</p>
+<h3 id="substrates-that-do-not-exist-at-that-thickness">Substrates that
+do not exist at that thickness</h3>
+<p>Board rendered as thin as paper and rigid as plastic. Material
+behaviour is where these tools are weakest, because behaviour is not
+visible in the training images.</p>
+<h3 id="finishes-that-cannot-go-on-that-material">Finishes that cannot
+go on that material</h3>
+<p>Spot UV on uncoated board. Foil on a compostable film. Both are shown
+constantly and neither is manufacturable.</p>
+<h3 id="claims-that-could-not-legally-appear">Claims that could not
+legally appear</h3>
+<p>Generated packaging invents certification marks, recycling symbols,
+and health claims. It will confidently produce a recycling logo that
+does not exist.</p>
+<h3 id="continuous-artwork-across-an-impossible-surface">Continuous
+artwork across an impossible surface</h3>
+<p>Imagery that flows unbroken around a form that has folds — meaning
+the artwork ignores the creases the object would actually have.</p>
+<hr />
+<h2 id="what-counts-as-a-checkable-failure">What counts as a checkable
+failure</h2>
+<p><strong>Somebody else has to be able to confirm it from the
+image.</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Not checkable</th>
+<th>Checkable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>"It didn't understand structure"</em></td>
+<td><em>"It drew a tuck flap with no slot to tuck into"</em></td>
+</tr>
+<tr>
+<td><em>"The material looks wrong"</em></td>
+<td><em>"It shows spot UV on uncoated kraft — that finish cannot go on
+that stock"</em></td>
+</tr>
+<tr>
+<td><em>"The proportions are off"</em></td>
+<td><em>"The front panel is 2:1 and the side panel is drawn the same
+width, so the box is impossible"</em></td>
+</tr>
+<tr>
+<td><em>"It's generic"</em></td>
+<td><em>"It invented a recycling mark — that symbol does not
+exist"</em></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Test: hand your claim and the image to a classmate. Can they
+confirm it?</strong> If they cannot, you have an impression.</p>
+<hr />
+<h2 id="attribution-whose-fault-was-it">Attribution: whose fault was
+it?</h2>
+<p>This is 8.3 and it is the hardest idea in the week.</p>
+<p>When an output fails, there are two possibilities:</p>
+<p><strong>The prompt caused it.</strong> You never specified a
+structure, so the tool invented one. That is your failure, and the fix
+is a better prompt.</p>
+<p><strong>The tool caused it.</strong> You specified a straight tuck
+box with a glue tab and it still drew something unfoldable. That is a
+limit of the tool, and the fix is to stop asking it for that.</p>
+<p><strong>The distinction decides what you do next</strong>, and it is
+only recoverable if you kept the prompt. This is why the log is the
+deliverable and the images are supporting material.</p>
+<hr />
+<h2 id="two-ways-to-fail-this-week">Two ways to fail this week</h2>
+<p><strong>The enthusiast.</strong> Finds the outputs brilliant, submits
+a folder of beautiful images, evaluates nothing. <em>"It helped me
+brainstorm."</em></p>
+<p><strong>The sceptic.</strong> Declares the outputs worthless, submits
+a short dismissal, evaluates nothing.</p>
+<p><strong>Both score the same, and both score badly</strong>, because
+neither has done the thing the outcome names. Uncritical rejection is
+not criticism.</p>
+<hr />
+<h2 id="vocabulary-this-week-owns">Vocabulary this week owns</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>What it means here</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Prompt</strong></td>
+<td>The exact text given to the tool, <strong>saved as written</strong>.
+Evidence, not a footnote</td>
+</tr>
+<tr>
+<td><strong>Checkable failure</strong></td>
+<td>Something in a generated concept that could not be made, which
+another person can confirm from the image</td>
+</tr>
+<tr>
+<td><strong>Attribution</strong></td>
+<td>Deciding whether a failure came from an underspecified prompt or
+from the tool</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="self-check">Self-check</h2>
+<ol type="1">
+<li><strong>Why does the outcome live in the second half of its own
+sentence?</strong> <em>(What this week is assessing)</em></li>
+<li><strong>Rewrite a style prompt as a structural one.</strong> What
+did you have to add? <em>(Prompts that specify structure)</em></li>
+<li><strong>Name four things these tools are reliably wrong
+about.</strong> <em>(What these tools are reliably wrong
+about)</em></li>
+<li><strong>Turn <em>"the material looks wrong"</em> into a checkable
+failure.</strong> <em>(What counts as checkable)</em></li>
+<li><strong>Your prompt did not name a structure and the output is
+unfoldable. Whose failure?</strong> <em>(Attribution)</em></li>
+<li><strong>Why do the enthusiast and the sceptic score the
+same?</strong> <em>(Two ways to fail)</em></li>
+</ol>
+<hr />
+<h2 id="bring-to-the-session">Bring to the session</h2>
+<ul>
+<li><strong>Confirmation your tool account works.</strong> One image,
+produced.</li>
+<li><strong>Three prompts for your own concept, unrun.</strong></li>
+</ul>
+</article>
+</main>
+<footer>
+  <p>DSGN 312 &middot; Packaging Design</p>
+  <p class="fine">Student materials, generated from course source.</p>
+</footer>
+</body>
+</html>

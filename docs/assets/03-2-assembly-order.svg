@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" width="900" height="340" role="img" aria-label="Four stages of folding a carton showing the glue tab face still exposed at stage two and covered by stage three">
+  <title>Assembly order decides where a glue tab can go</title>
+  <rect width="900" height="340" fill="#ffffff"/>
+  <text x="450" y="34" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="11" letter-spacing="1.4" fill="#565c66">THE DRAWING CANNOT SHOW YOU THIS · ONLY THE SEQUENCE CAN</text>
+
+  <g font-family="ui-monospace, Menlo, monospace" font-size="12" fill="#2f4f6b" text-anchor="middle">
+    <text x="130" y="80">1</text><text x="340" y="80">2</text><text x="550" y="80">3</text><text x="760" y="80">4</text>
+  </g>
+
+  <!-- 1 flat -->
+  <g stroke="#171a22" stroke-width="2" fill="none">
+    <rect x="70" y="100" width="120" height="110"/>
+    <line x1="110" y1="100" x2="110" y2="210" stroke="#2f4f6b" stroke-dasharray="6 4" stroke-width="1.6"/>
+    <line x1="150" y1="100" x2="150" y2="210" stroke="#2f4f6b" stroke-dasharray="6 4" stroke-width="1.6"/>
+  </g>
+  <rect x="150" y="100" width="40" height="110" fill="#cfe0d6"/>
+  <text x="130" y="238" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#8b9199">flat</text>
+
+  <!-- 2 first fold, tab exposed -->
+  <g stroke="#171a22" stroke-width="2" fill="none">
+    <path d="M290 100 L290 210 L370 210 L370 100 Z"/>
+    <path d="M370 100 L410 118 L410 228 L370 210"/>
+  </g>
+  <path d="M370 100 L410 118 L410 228 L370 210 Z" fill="#cfe0d6" stroke="#171a22" stroke-width="2"/>
+  <text x="410" y="94" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="10.5" fill="#2f6b4f">TAB FACE OPEN</text>
+  <text x="340" y="256" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#2f6b4f">glue it here</text>
+
+  <!-- 3 second fold, covered -->
+  <g stroke="#171a22" stroke-width="2" fill="none">
+    <path d="M500 100 L500 210 L580 210 L580 100 Z"/>
+    <path d="M500 100 L540 82 L620 82 L580 100"/>
+  </g>
+  <path d="M500 100 L540 82 L620 82 L580 100 Z" fill="#f0f2ef" stroke="#171a22" stroke-width="2"/>
+  <rect x="576" y="104" width="8" height="102" fill="#d8b9b2"/>
+  <text x="612" y="146" font-family="ui-monospace, Menlo, monospace" font-size="10.5" fill="#8a3d2f">TAB FACE</text>
+  <text x="612" y="162" font-family="ui-monospace, Menlo, monospace" font-size="10.5" fill="#8a3d2f">NOW COVERED</text>
+  <text x="550" y="256" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#8a3d2f">too late</text>
+
+  <!-- 4 closed -->
+  <g stroke="#171a22" stroke-width="2" fill="none">
+    <path d="M710 100 L710 210 L790 210 L790 100 Z"/>
+    <path d="M710 100 L750 82 L830 82 L790 100"/>
+    <path d="M790 100 L830 82 L830 192 L790 210"/>
+  </g>
+  <text x="760" y="238" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#8b9199">closed</text>
+
+  <line x1="60" y1="290" x2="840" y2="290" stroke="#e3e6e0" stroke-width="1"/>
+  <text x="450" y="316" text-anchor="middle" font-family="Charter, Georgia, serif" font-size="16" fill="#171a22">Walk your own structure through assembly before you draw a single tab.</text>
+</svg>

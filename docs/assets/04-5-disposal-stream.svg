@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 400" width="900" height="400" role="img" aria-label="One board following three possible disposal routes, with the feature that disqualifies it from each route named on the branch">
+  <title>Disposal stream, and the feature that disqualifies it</title>
+  <rect width="900" height="400" fill="#ffffff"/>
+  <text x="450" y="34" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="11" letter-spacing="1.4" fill="#565c66">“RECYCLABLE” NAMES NO ROUTE</text>
+
+  <rect x="60" y="170" width="130" height="70" fill="#eef1ee" stroke="#171a22" stroke-width="2"/>
+  <text x="125" y="200" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#171a22">your board</text>
+  <text x="125" y="220" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="10.5" fill="#8b9199">350 gsm uncoated</text>
+
+  <g stroke="#c3c9c2" stroke-width="2" fill="none">
+    <path d="M190 190 C 260 190, 260 108, 330 108"/>
+    <path d="M190 205 L330 205"/>
+    <path d="M190 220 C 260 220, 260 302, 330 302"/>
+  </g>
+
+  <g font-family="ui-monospace, Menlo, monospace" font-size="12" letter-spacing="1.1">
+    <text x="340" y="100" fill="#2f6b4f">KERBSIDE PAPER</text>
+    <text x="340" y="197" fill="#2f4f6b">COMMERCIAL COMPOST</text>
+    <text x="340" y="294" fill="#8a3d2f">LANDFILL</text>
+  </g>
+
+  <g font-family="system-ui, sans-serif" font-size="13" fill="#171a22">
+    <text x="340" y="126">Conditions: remove the window. Rinse.</text>
+    <text x="340" y="223">Industrial facility only — check locally.</text>
+    <text x="340" y="320">Where everything else ends up.</text>
+  </g>
+
+  <rect x="620" y="72" width="230" height="72" fill="#fbf3f1" stroke="#d8b9b2" stroke-width="1.5"/>
+  <text x="735" y="96" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="10.5" letter-spacing="1.1" fill="#8a3d2f">WHAT KNOCKS IT OUT</text>
+  <text x="735" y="118" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#171a22">gloss lamination · adhesive</text>
+  <text x="735" y="136" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#171a22">metallised film · a window</text>
+  <line x1="560" y1="108" x2="616" y2="108" stroke="#d8b9b2" stroke-width="2"/>
+
+  <line x1="60" y1="352" x2="840" y2="352" stroke="#e3e6e0" stroke-width="1"/>
+  <text x="450" y="378" text-anchor="middle" font-family="Charter, Georgia, serif" font-size="16" fill="#171a22">Naming the threat is worth more than naming the virtue. The threat is the part you control.</text>
+</svg>

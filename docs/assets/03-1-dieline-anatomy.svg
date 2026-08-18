@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420" width="900" height="420" role="img" aria-label="A flat straight tuck box dieline with cut lines drawn solid, crease lines drawn dashed, and the glue tab, dust flaps and tuck flaps labelled">
+  <title>Dieline anatomy — one drawing, two instructions</title>
+  <rect width="900" height="420" fill="#ffffff"/>
+  <text x="450" y="34" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="11" letter-spacing="1.4" fill="#565c66">ONE DRAWING · TWO INSTRUCTIONS TO A MACHINE</text>
+
+  <!-- panels: back | side | front | side | glue -->
+  <g stroke="#171a22" stroke-width="2" fill="none">
+    <path d="M150 140 L150 300 L270 300 L270 140 Z"/>
+    <path d="M270 140 L270 300 L330 300 L330 140 Z"/>
+    <path d="M330 140 L330 300 L450 300 L450 140 Z"/>
+    <path d="M450 140 L450 300 L510 300 L510 140 Z"/>
+    <path d="M510 140 L510 300 L545 300 L545 140 Z"/>
+    <!-- top tuck + dust flaps -->
+    <path d="M330 140 L330 92 L450 92 L450 140"/>
+    <path d="M270 140 L278 108 L322 108 L330 140"/>
+    <path d="M450 140 L458 108 L502 108 L510 140"/>
+    <!-- bottom tuck + dust flaps -->
+    <path d="M330 300 L330 348 L450 348 L450 300"/>
+    <path d="M270 300 L278 332 L322 332 L330 300"/>
+    <path d="M450 300 L458 332 L502 332 L510 300"/>
+  </g>
+
+  <!-- crease lines, dashed -->
+  <g stroke="#2f4f6b" stroke-width="1.8" stroke-dasharray="7 5" fill="none">
+    <line x1="270" y1="140" x2="270" y2="300"/>
+    <line x1="330" y1="140" x2="330" y2="300"/>
+    <line x1="450" y1="140" x2="450" y2="300"/>
+    <line x1="510" y1="140" x2="510" y2="300"/>
+    <line x1="270" y1="140" x2="510" y2="140"/>
+    <line x1="270" y1="300" x2="510" y2="300"/>
+  </g>
+
+  <!-- panel names -->
+  <g font-family="system-ui, sans-serif" font-size="12.5" fill="#8b9199" text-anchor="middle">
+    <text x="210" y="225">back</text>
+    <text x="300" y="225">side</text>
+    <text x="390" y="225">front</text>
+    <text x="480" y="225">side</text>
+  </g>
+
+  <!-- labels -->
+  <g font-family="ui-monospace, Menlo, monospace" font-size="11.5" letter-spacing="1.1">
+    <text x="390" y="80" text-anchor="middle" fill="#2f4f6b">TUCK FLAP</text>
+    <text x="240" y="102" text-anchor="middle" fill="#2f4f6b">DUST FLAP</text>
+    <text x="600" y="222" fill="#2f4f6b">GLUE TAB</text>
+    <text x="390" y="374" text-anchor="middle" fill="#2f4f6b">TUCK FLAP</text>
+  </g>
+  <line x1="596" y1="218" x2="545" y2="218" stroke="#2f4f6b" stroke-width="1"/>
+  <line x1="252" y1="106" x2="290" y2="120" stroke="#2f4f6b" stroke-width="1"/>
+
+  <!-- key -->
+  <g font-family="system-ui, sans-serif" font-size="13" fill="#171a22">
+    <line x1="640" y1="130" x2="686" y2="130" stroke="#171a22" stroke-width="2"/>
+    <text x="698" y="135">CUT — the blade goes through</text>
+    <line x1="640" y1="164" x2="686" y2="164" stroke="#2f4f6b" stroke-width="1.8" stroke-dasharray="7 5"/>
+    <text x="698" y="169">CREASE — the board folds</text>
+  </g>
+
+  <line x1="60" y1="392" x2="840" y2="392" stroke="#e3e6e0" stroke-width="1"/>
+  <text x="450" y="412" text-anchor="middle" font-family="Charter, Georgia, serif" font-size="16" fill="#171a22">Separate layers. A crease on the cut layer becomes a cut, and the package falls apart on the line.</text>
+</svg>

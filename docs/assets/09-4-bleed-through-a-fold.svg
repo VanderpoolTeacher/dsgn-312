@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" width="900" height="360" role="img" aria-label="Two folded panels, the first with artwork stopping at the crease leaving a white line along the fold, the second with artwork running past the crease and no line">
+  <title>Bleed through a fold — the white sliver</title>
+  <rect width="900" height="360" fill="#ffffff"/>
+  <text x="450" y="34" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="11" letter-spacing="1.4" fill="#565c66">IDENTICAL ARTWORK · ONE DIFFERENCE · 3 MM</text>
+
+  <!-- LEFT -->
+  <text x="230" y="76" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="12" letter-spacing="1.2" fill="#8a3d2f">ARTWORK STOPS AT THE CREASE</text>
+  <g>
+    <rect x="120" y="110" width="105" height="130" fill="#2f4f6b"/>
+    <rect x="235" y="110" width="105" height="130" fill="#2f4f6b"/>
+    <rect x="225" y="110" width="10" height="130" fill="#ffffff"/>
+    <line x1="230" y1="100" x2="230" y2="252" stroke="#8a3d2f" stroke-width="1.5" stroke-dasharray="6 4"/>
+  </g>
+  <text x="230" y="272" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="11" fill="#8a3d2f">THE FOLD</text>
+  <text x="230" y="300" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#8a3d2f">A white line along the crease.</text>
+
+  <!-- RIGHT -->
+  <text x="640" y="76" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="12" letter-spacing="1.2" fill="#2f6b4f">ARTWORK RUNS 3 MM PAST</text>
+  <g>
+    <rect x="530" y="110" width="220" height="130" fill="#2f4f6b"/>
+    <line x1="640" y1="100" x2="640" y2="252" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="6 4"/>
+  </g>
+  <text x="640" y="272" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="11" fill="#2f6b4f">THE FOLD</text>
+  <text x="640" y="300" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#2f6b4f">Nothing to see.</text>
+
+  <line x1="60" y1="326" x2="840" y2="326" stroke="#e3e6e0" stroke-width="1"/>
+  <text x="450" y="350" text-anchor="middle" font-family="Charter, Georgia, serif" font-size="16" fill="#171a22">The fold is never exactly where the file says, and the board pulls the surface around the corner.</text>
+</svg>

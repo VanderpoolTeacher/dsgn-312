@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" width="900" height="340" role="img" aria-label="Three dated states of a design with the cause of each change written on the arrow between them, contrasted with three states that differ only in colour">
+  <title>Three dated states — the cause is on the arrow</title>
+  <rect width="900" height="340" fill="#ffffff"/>
+  <text x="450" y="34" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="11" letter-spacing="1.4" fill="#565c66">ITERATION IS CHANGE WITH A CAUSE ATTACHED</text>
+
+  <!-- states -->
+  <g>
+    <rect x="70" y="76" width="130" height="96" fill="#f7f8f6" stroke="#171a22" stroke-width="2"/>
+    <text x="135" y="126" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#8b9199">concept</text>
+    <text x="135" y="192" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="11" fill="#2f4f6b">WEEK 8 · DATED</text>
+  </g>
+  <g>
+    <rect x="385" y="76" width="130" height="96" fill="#f7f8f6" stroke="#171a22" stroke-width="2"/>
+    <text x="450" y="126" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#8b9199">revision</text>
+    <text x="450" y="192" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="11" fill="#2f4f6b">WEEK 11 · DATED</text>
+  </g>
+  <g>
+    <rect x="700" y="76" width="130" height="96" fill="#f7f8f6" stroke="#171a22" stroke-width="2"/>
+    <text x="765" y="126" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#8b9199">production</text>
+    <text x="765" y="192" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="11" fill="#2f4f6b">WEEK 13 · DATED</text>
+  </g>
+
+  <!-- arrows with causes -->
+  <g stroke="#2f6b4f" stroke-width="2" fill="none">
+    <path d="M206 124 L379 124"/><path d="M371 118 L379 124 L371 130"/>
+    <path d="M521 124 L694 124"/><path d="M686 118 L694 124 L686 130"/>
+  </g>
+  <text x="292" y="112" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#2f6b4f">the tuck flap</text>
+  <text x="292" y="150" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#2f6b4f">had nothing to enter</text>
+  <text x="607" y="112" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#2f6b4f">two of three testers</text>
+  <text x="607" y="150" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#2f6b4f">opened it from the base</text>
+
+  <!-- the counter-example -->
+  <rect x="60" y="226" width="800" height="60" fill="#fbf3f1" stroke="#d8b9b2" stroke-width="1.5"/>
+  <text x="80" y="252" font-family="ui-monospace, Menlo, monospace" font-size="11" letter-spacing="1.1" fill="#8a3d2f">NOT ITERATION</text>
+  <g>
+    <rect x="250" y="238" width="34" height="36" fill="#2f4f6b"/>
+    <rect x="296" y="238" width="34" height="36" fill="#6b4f2f"/>
+    <rect x="342" y="238" width="34" height="36" fill="#2f6b4f"/>
+  </g>
+  <text x="400" y="254" font-family="system-ui, sans-serif" font-size="13.5" fill="#171a22">Three colourways, produced the same afternoon.</text>
+  <text x="400" y="274" font-family="system-ui, sans-serif" font-size="13.5" fill="#8b9199">One design shown three times — and the dates say so.</text>
+
+  <line x1="60" y1="304" x2="840" y2="304" stroke="#e3e6e0" stroke-width="1"/>
+  <text x="450" y="328" text-anchor="middle" font-family="Charter, Georgia, serif" font-size="16" fill="#171a22">A revision with no antecedent is a preference.</text>
+</svg>
