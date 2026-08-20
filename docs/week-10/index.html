@@ -4,22 +4,54 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Week 10 &middot; DSGN 312</title>
-<link rel="stylesheet" href="../style.css?v=518163b1">
+<link rel="stylesheet" href="../style.css?v=61f2cc37">
 </head>
 <body>
 <header class="bar">
-  <a class="home" href="../index.html"><b>DSGN 312</b> <span>Packaging Design</span></a>
+  <a class="home" href="../index.html"><svg class="hico" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.9 10.7 11.3 3.5a1.1 1.1 0 0 1 1.4 0l8.4 7.2"/><path d="M5.4 9.1v10.3a1 1 0 0 0 1 1h11.2a1 1 0 0 0 1-1V9.1"/><path d="M9.7 20.4v-5.1h4.6v5.1"/></svg><b>DSGN 312</b> <span>Packaging Design</span></a>
 </header>
 <main>
 <nav class="crumb"><a href="../index.html">All weeks</a><span>/</span><em>Week 10</em></nav>
-<h1>Week 10<span class="sub">Building it</span></h1><ul class="cards"><li><a href="lesson.html"><span class="kind">Lesson</span><span class="t">Building it</span></a></li>
+<h1>Week 10 &middot; Building it</h1><div class="tabs" data-tabs><div class="tabstrip" role="tablist" aria-label="Week 10 summary"><button type="button" role="tab" class="tab is-on" id="t-ov-10" aria-controls="p-ov-10" aria-selected="true" tabindex="0">Overview</button><button type="button" role="tab" class="tab" id="t-td-10" aria-controls="p-td-10" aria-selected="false" tabindex="-1">To Do List</button></div><div class="tabpanel" id="p-ov-10" role="tabpanel" aria-labelledby="t-ov-10"><p>The week the project stops being a file. You cut your dieline in the board you specified and find out whether it closes.</p><p><strong>Course outcomes:</strong> LO 1, LO 2.</p><p>&gt; <strong>This week is observed, not submitted.</strong> Whether your mockup assembles from your submitted dieline <strong>without tape, trimming or correction</strong> is part of LO 2&#x27;s evidence — and it is invisible afterwards, because <strong>a taped model photographs identically to a folded one.</strong> It is recorded at the bench or not at all.</p><p class="lolead">By the end of this week you can</p><ul class="los"><li data-n="10.1">Cut, crease and assemble at full size in the specified material.</li><li data-n="10.2">Test closure, protection and opening by handling the object.</li><li data-n="10.3">Produce a 3D visualization that matches the object you built.</li></ul><p class="asmt"><span>Assessment</span>Formative · satisfactory/unsatisfactory · observed at the bench.</p></div><div class="tabpanel" id="p-td-10" role="tabpanel" aria-labelledby="t-td-10"><p class="rvnote">To successfully complete Week 10, please do the following:</p><ol><li><span class="v">Read</span><a href="lesson.html">Building it</a></li><li><span class="v">Do</span><a href="lab.html">Week 10 Lab — Build at the bench</a></li><li><span class="v">Submit</span><a href="assignment.html">Week 10 Assignment — Phase 5, mockup and visualization</a></li><li><span class="v">Open</span><a href="bench-observation-log.html">Bench observation log — week 10</a></li><li><span class="v">Review</span><span>Provided material &mdash; 0.50 h this week. Distributed in class.</span></li></ol></div></div><ul class="cards"><li><a href="lesson.html"><span class="kind">Lesson</span><span class="t">Building it</span></a></li>
 <li><a href="lab.html"><span class="kind">Lab</span><span class="t">Week 10 Lab — Build at the bench</span></a></li>
 <li><a href="assignment.html"><span class="kind">Assignment</span><span class="t">Week 10 Assignment — Phase 5, mockup and visualization</span></a></li>
 <li><a href="bench-observation-log.html"><span class="kind">Sheet</span><span class="t">Bench observation log — week 10</span></a></li></ul><section class="review"><h2>Review before class<span class="hrs">0.50 h</span></h2><p class="rvnote">Material is provided in class. This is on top of the lesson, the lab and the assignment.</p><div class="standing"><p class="gl">Terms are in the <a href="../reference/glossary.html">Glossary</a>, by module.</p></div></section>
+<script>
+(function(){
+  var w = document.querySelector('[data-tabs]');
+  if(!w) return;
+  var tabs = [].slice.call(w.querySelectorAll('[role=tab]')),
+      panels = [].slice.call(w.querySelectorAll('[role=tabpanel]'));
+  if(tabs.length < 2) return;
+  function show(n){
+    tabs.forEach(function(t,i){
+      var on = i === n;
+      t.classList.toggle('is-on', on);
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+      panels[i].hidden = !on;
+    });
+  }
+  tabs.forEach(function(t,i){
+    t.addEventListener('click', function(){ show(i); });
+    t.addEventListener('keydown', function(e){
+      var n = null;
+      if(e.key === 'ArrowRight') n = (i+1) % tabs.length;
+      if(e.key === 'ArrowLeft')  n = (i-1+tabs.length) % tabs.length;
+      if(e.key === 'Home') n = 0;
+      if(e.key === 'End')  n = tabs.length-1;
+      if(n === null) return;
+      e.preventDefault(); show(n); tabs[n].focus();
+    });
+  });
+  show(0);   // panels are unhidden in the markup, so JS-off shows both
+})();
+</script>
+
 </main>
 <footer>
   <p>DSGN 312 &middot; Packaging Design</p>
-  <p class="fine">Student materials, generated from course source.</p>
+  <p class="fine">Student materials, generated from course source. <a href="../reference/accessibility.html">Accessibility</a></p>
 </footer>
 </body>
 </html>

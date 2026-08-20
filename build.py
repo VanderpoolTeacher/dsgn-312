@@ -29,6 +29,7 @@ unwrapped to plain text rather than left dangling, and internal tracking links
 are dropped, so nothing in docs/ points at material students should not have.
 """
 
+import datetime
 import hashlib
 import html
 import json
@@ -79,8 +80,6 @@ REFERENCE = [
      "reference/presentation-rubric.html",
      "Presentation rubric", "How the account of the work is scored, separately from the work."),
 ]
-
-NUMBER_WORD = {7: "seven", 8: "eight", 10: "ten", 12: "twelve", 14: "fourteen", 15: "fifteen", 16: "sixteen"}
 
 LINK_RE = re.compile(r"\[([^\]\[]*)\]\(([^)\s]+)\)")
 TRACKING_RE = re.compile(r"^\*\*Tracking card:\*\*.*$", re.M)
@@ -174,24 +173,14 @@ def build_deck(wdir, wnum, wtitle, asset_files):
         screens.append(body)
 
         tag = re.search(r"\*\*ASSET\*\*\s*·\s*`(\w+)`", c)
+        # two formats in the specs: "image prompt **2.6**" and "2.6 in [course image prompts]"
+        num = (re.search(r"image prompt \*\*(\d+)\.(\d+)\*\*", c)
+               or re.search(r"\*\*ASSET\*\*[^\n]*?\b(\d+)\.(\d+)\b[^\n]*?course image prompts", c))
         alt = re.search(r"\|\s*\*\*Alt text\*\*\s*\|(.*?)\|", c)
         fn = None
-
-        # Canonical: the Selected field names the file outright.
-        #   | **Selected** | `assets/04-2-reduction-failure-set.svg` |
-        # One format, per Step 7. A named file that does not exist yet resolves
-        # to None and falls through to the "Shown in class." placeholder.
-        sel = re.search(r"\|\s*\*\*Selected\*\*\s*\|\s*`assets/([^`]+)`", c)
-        if sel:
-            fn = next((a for a in asset_files if a == sel.group(1)), None)
-
-        # Legacy, COMM 260 only: "image prompt **2.6**" / "2.6 in [course image prompts]".
-        if fn is None:
-            num = (re.search(r"image prompt \*\*(\d+)\.(\d+)\*\*", c)
-                   or re.search(r"\*\*ASSET\*\*[^\n]*?\b(\d+)\.(\d+)\b[^\n]*?course image prompts", c))
-            if num:
-                want = f"{int(num.group(1)):02d}-{num.group(2)}-"
-                fn = next((a for a in asset_files if a.startswith(want)), None)
+        if num:
+            want = f"{int(num.group(1)):02d}-{num.group(2)}-"
+            fn = next((a for a in asset_files if a.startswith(want)), None)
         gen = bool(re.search(r"\*\(generated\)\*", c))
         vids = []
         for vm in re.finditer(r"youtube\.com/watch\?v=([A-Za-z0-9_-]{6,})", c):
@@ -225,7 +214,7 @@ def build_deck(wdir, wnum, wtitle, asset_files):
             cred = '<p class="cred">Generated image</p>' if gen else ""
             media = (f'<div class="sfig"><img src="../assets/{html.escape(fn)}" '
                      f'alt="{html.escape(alt)}" loading="lazy">{cred}</div>')
-        elif tag in ("FIND", "SHOW", "MAKE", "GENERATE", "DIAGRAM", "PAIR", "PRINT") and not vids:
+        elif tag in ("FIND", "SHOW", "MAKE", "GENERATE") and not vids:
             media = ('<p class="spend">Shown in class.</p>')
         norm = lambda x: re.sub(r"[^a-z0-9]", "", x.lower())
         first = re.search(r"<h[1-6][^>]*>(.*?)</h[1-6]>", frag, re.S)
@@ -387,6 +376,488 @@ def md_to_html(text, fmt="gfm"):
 STYLE_V = ""
 
 
+
+# --- Week overview and To Do list -------------------------------------------
+#
+# Sourced from 00-week-outline.md, which is itself WITHHELD. Only three parts
+# are lifted: the one-line framing, the outcomes table, and the assessment
+# declaration. The rest of that file — what must exist before the week runs,
+# why the assessment is where it is — stays unpublished.
+
+PROSE_HEADINGS = ("The week in one line", "What this week is", "What this week does")
+OUTCOME_HEADINGS = ("Lesson outcomes", "By the end of this week you can")
+
+TODO_VERB = {
+    "Lesson": "Read", "Slides": "Review", "Demo": "Watch", "Lab": "Do",
+    "Assignment": "Submit", "Checkpoint": "Submit", "Interactive": "Practise",
+    "Knowledge check": "Review", "Worksheet": "Print", "Files": "Download",
+}
+
+
+def _section(md, heading):
+    m = re.search(r"^##\s+" + re.escape(heading) + r"\s*\n(.*?)(?=^##\s|^---\s*$)",
+                  md, re.S | re.M)
+    return m.group(1).strip() if m else ""
+
+
+def _plain(t):
+    t = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", t)
+    t = re.sub(r"\*\*(.+?)\*\*", r"\1", t)
+    return re.sub(r"\*(.+?)\*", r"\1", t).strip()
+
+
+def _inline(t):
+    """Bold survives; links are flattened — they would point at withheld files."""
+    t = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", t)
+    t = html.escape(t)
+    return re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", t)
+
+
+def outline_assessment(md):
+    """Two shapes: '**Assessment:** text' and '**Assessment: text.** rationale'."""
+    m = re.search(r"^\*\*Assessment:\*\*\s*(.+?)\s*$", md, re.M)
+    if m:
+        return _plain(m.group(1))
+    m = re.search(r"^\*\*Assessment:\s*(.+?)\*\*", md, re.M)
+    return _plain(m.group(1)) if m else ""
+
+
+def outline_outcomes(md):
+    body = ""
+    for h in OUTCOME_HEADINGS:
+        body = _section(md, h)
+        if body:
+            break
+    rows = []
+    for line in body.splitlines():
+        m = re.match(r"^\|\s*\*\*([\d.]+)\*\*\s*\|\s*([^|]+?)\s*\|", line)
+        if m:
+            rows.append((m.group(1), m.group(2)))
+    return rows
+
+
+def overview_html(outline_md):
+    """Panel contents only — the tab strip supplies the heading."""
+    prose = ""
+    for h in PROSE_HEADINGS:
+        prose = _section(outline_md, h)
+        if prose:
+            break
+    paras = [x.strip() for x in prose.split("\n\n") if x.strip()
+             and not x.strip().startswith("**Assessment")]
+
+    out = []
+    for x in paras[:3]:
+        out.append(f'<p>{_inline(x)}</p>')
+
+    los = outline_outcomes(outline_md)
+    if los:
+        out.append('<p class="lolead">By the end of this week you can</p><ul class="los">')
+        for n, text in los:
+            out.append(f'<li data-n="{html.escape(n)}">{_inline(text)}</li>')
+        out.append('</ul>')
+
+    a = outline_assessment(outline_md)
+    if a:
+        out.append(f'<p class="asmt"><span>Assessment</span>{html.escape(a)}</p>')
+    return "".join(out)
+
+
+def todo_html(wnum, cards, review_hours):
+    """Panel contents only. Mirrors the page top to bottom: the cards in order,
+    then review material, which is the last section on the page."""
+    lis = []
+    for href, label, title in cards:
+        verb = TODO_VERB.get(label, "Open")
+        lis.append(f'<li><span class="v">{verb}</span>'
+                   f'<a href="{href}">{html.escape(title or label)}</a></li>')
+    if review_hours:
+        lis.append(f'<li><span class="v">Review</span>'
+                   f'<span>Provided material &mdash; {review_hours} '
+                   f'this week. Distributed in class.</span></li>')
+    if not lis:
+        return ""
+    return (f'<p class="rvnote">To successfully complete Week {wnum}, '
+            'please do the following:</p><ol>' + "".join(lis) + '</ol>')
+
+
+def week_tabs(wnum, overview, todo):
+    """Two tabs, one panel at a time.
+
+    No panel is marked hidden in the markup, so with JS off both panels render
+    stacked and nothing is lost. TABS_JS hides the inactive one on load.
+    """
+    if not overview and not todo:
+        return ""
+    tabs, panels, first = [], [], True
+    for key, label, inner in (("ov", "Overview", overview),
+                              ("td", "To Do List", todo)):
+        if not inner:
+            continue
+        on = " is-on" if first else ""
+        sel = "true" if first else "false"
+        tabs.append(f'<button type="button" role="tab" class="tab{on}" '
+                    f'id="t-{key}-{wnum}" aria-controls="p-{key}-{wnum}" '
+                    f'aria-selected="{sel}" tabindex="{"0" if first else "-1"}">'
+                    f'{label}</button>')
+        panels.append(f'<div class="tabpanel" id="p-{key}-{wnum}" role="tabpanel" '
+                      f'aria-labelledby="t-{key}-{wnum}">{inner}</div>')
+        first = False
+    return (f'<div class="tabs" data-tabs>'
+            f'<div class="tabstrip" role="tablist" '
+            f'aria-label="Week {wnum} summary">{"".join(tabs)}</div>'
+            f'{"".join(panels)}</div>')
+
+
+HOME_ICON = (
+    '<svg class="hico" viewBox="0 0 24 24" width="17" height="17" fill="none" '
+    'stroke="currentColor" stroke-width="1.7" stroke-linecap="round" '
+    'stroke-linejoin="round" aria-hidden="true" focusable="false">'
+    '<path d="M2.9 10.7 11.3 3.5a1.1 1.1 0 0 1 1.4 0l8.4 7.2"/>'
+    '<path d="M5.4 9.1v10.3a1 1 0 0 0 1 1h11.2a1 1 0 0 0 1-1V9.1"/>'
+    '<path d="M9.7 20.4v-5.1h4.6v5.1"/>'
+    '</svg>'
+)
+
+
+
+# --- Chrome for copied interactive pages ------------------------------------
+#
+# Interactives are copied wholesale from student-files/ and carry their own
+# inlined stylesheet, including their own copy of the palette. That copy drifts:
+# it still held the pre-2026-08-20 --faint values that fail WCAG AA. This puts
+# the header on them and re-syncs the tokens.
+#
+# Applied only to pages that already brand themselves "· <COURSE>" in the title.
+# week-12/landing-page is a starter template the student publishes as their own
+# work — it must NOT get course chrome.
+
+CANON_TOKENS = [
+    ("--soft:rgba(26,29,31,.66)",     "--soft:rgba(26,29,31,.82)"),
+    ("--faint:rgba(26,29,31,.45)",    "--faint:rgba(26,29,31,.63)"),
+    ("--soft:rgba(233,230,222,.66)",  "--soft:rgba(233,230,222,.80)"),
+    ("--faint:rgba(233,230,222,.42)", "--faint:rgba(233,230,222,.52)"),
+    ("--rule:rgba(26,29,31,.16); --accent",
+     "--rule:rgba(26,29,31,.16); --edge:rgba(26,29,31,.49); --accent"),
+    ("--rule:rgba(233,230,222,.16); --accent",
+     "--rule:rgba(233,230,222,.16); --edge:rgba(233,230,222,.38); --accent"),
+]
+
+CHROME_CSS = """
+.bar{border-bottom:1px solid var(--rule);background:var(--panel)}
+.home{display:flex;align-items:baseline;gap:.55rem;max-width:80ch;margin:0 auto;
+  padding:.9rem clamp(1rem,4vw,2rem);text-decoration:none;color:var(--ink)}
+.home span{color:var(--faint);font-size:.9rem}
+.hico{flex:none;align-self:center;color:var(--accent);transition:transform .12s}
+.home:hover .hico{transform:translateY(-1px)}
+.home:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:2px}
+@media (prefers-reduced-motion:reduce){.hico{transition:none}.home:hover .hico{transform:none}}
+@media(max-width:26rem){.home span{display:none}}
+footer{border-top:1px solid var(--rule);margin-top:4rem;padding:1.6rem clamp(1rem,4vw,2rem) 3rem}
+footer p{max-width:80ch;margin:0 auto;color:var(--faint);font-size:.85rem}
+footer .fine{margin-top:.3rem}
+"""
+
+
+def add_chrome(path, depth):
+    """Header + palette sync for a copied interactive. Returns True if applied."""
+    t = path.read_text()
+    if f"&middot; {COURSE}</title>" not in t and f"· {COURSE}</title>" not in t:
+        return False          # not a course page — leave it alone
+    if 'class="home"' in t:
+        return False          # already chromed
+
+    for old, new in CANON_TOKENS:
+        t = t.replace(old, new)
+
+    up = "../" * depth
+    header = (f'<header class="bar">'
+              f'<a class="home" href="{up}index.html">{HOME_ICON}'
+              f'<b>{COURSE}</b> <span>{COURSE_LONG}</span></a>'
+              f'</header>')
+    footer = (f'<footer><p>{COURSE} &middot; {COURSE_LONG}</p>'
+              f'<p class="fine">Student materials, generated from course source. '
+              f'<a href="{up}reference/accessibility.html">Accessibility</a></p>'
+              f'</footer>')
+    t = t.replace("</style>", CHROME_CSS + "</style>", 1)
+    t = t.replace("<body>", "<body>\n" + header, 1)
+    t = t.replace("</body>", footer + "\n</body>", 1)
+    path.write_text(t)
+    return True
+
+
+
+# --- Accessibility report -----------------------------------------------------
+#
+# Generated from the built site, every build. The point is that it cannot make a
+# claim the pages do not support: the ratios are computed from the emitted
+# style.css and the structural counts come from walking docs/. If something
+# regresses, the published report says so rather than going quietly stale.
+
+# Deliberately institution-neutral: this site is general content and is not
+# tied to one college. Naming a real office here would be wrong in any other
+# context, and inventing one would be worse, so the route is the instructor.
+
+
+def _srgb(c):
+    c /= 255
+    return c/12.92 if c <= 0.03928 else ((c+0.055)/1.055) ** 2.4
+
+
+def _lum(rgb):
+    r, g, b = (_srgb(x) for x in rgb)
+    return .2126*r + .7152*g + .0722*b
+
+
+def _ratio(a, b):
+    la, lb = _lum(a), _lum(b)
+    hi, lo = max(la, lb), min(la, lb)
+    return (hi + .05) / (lo + .05)
+
+
+def _hex(h):
+    h = h.lstrip("#")
+    return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+
+
+def _over(fg, a, bg):
+    return tuple(round(f*a + b*(1-a)) for f, b in zip(fg, bg))
+
+
+def contrast_audit(css):
+    """Ratios computed from the stylesheet actually shipped."""
+    def tok(name, scope):
+        m = re.search(r"--%s:(#[0-9A-Fa-f]{6}|rgba\([^)]*\))" % name, scope)
+        return m.group(1) if m else None
+
+    blocks = {}
+    m = re.search(r":root\{(.*?)\}", css, re.S)
+    blocks["light"] = m.group(1) if m else ""
+    m = re.search(r"prefers-color-scheme:dark\).*?:root\{(.*?)\}", css, re.S)
+    blocks["dark"] = m.group(1) if m else ""
+
+    rows = []
+    for theme, scope in blocks.items():
+        if not scope:
+            continue
+        ground, panel = _hex(tok("ground", scope)), _hex(tok("panel", scope))
+        ink = _hex(tok("ink", scope))
+        for name, need, kind in (("ink", 4.5, "body text"),
+                                 ("soft", 4.5, "secondary text"),
+                                 ("faint", 4.5, "captions, labels"),
+                                 ("accent", 4.5, "links and active tab"),
+                                 ("edge", 3.0, "control boundaries")):
+            v = tok(name, scope)
+            if not v:
+                continue
+            if v.startswith("rgba"):
+                nums = re.findall(r"[\d.]+", v)
+                col_on = lambda bg: _over(tuple(int(x) for x in nums[:3]), float(nums[3]), bg)
+            else:
+                col_on = lambda bg, c=_hex(v): c
+            for bgname, bg in (("ground", ground), ("panel", panel)):
+                r = _ratio(col_on(bg), bg)
+                rows.append((theme, name, kind, bgname, r, need, r >= need))
+    return rows
+
+
+def structure_audit(docs):
+    pages = sorted(docs.rglob("*.html"))
+    res = dict(pages=len(pages), lang=0, main=0, title=0, imgs=0, img_alt=0,
+               links=0, link_named=0, buttons=0, button_named=0,
+               h1_one=0, no_h1=[], multi_h1=[], no_main=[], dead=[])
+    for f in pages:
+        t = f.read_text()
+        b = re.sub(r"<(script|style).*?</\1>", "", t, flags=re.S)
+        if "<html lang=" in t: res["lang"] += 1
+        if "<main>" in t: res["main"] += 1
+        else: res["no_main"].append(str(f.relative_to(docs)))
+        if re.search(r"<title>.+?</title>", t): res["title"] += 1
+        n1 = len(re.findall(r"<h1[ >]", b))
+        if n1 == 1: res["h1_one"] += 1
+        elif n1 == 0: res["no_h1"].append(str(f.relative_to(docs)))
+        else: res["multi_h1"].append((str(f.relative_to(docs)), n1))
+        for img in re.findall(r"<img [^>]*>", b):
+            res["imgs"] += 1
+            if "alt=" in img: res["img_alt"] += 1
+        for a in re.findall(r"<a [^>]*>(.*?)</a>", b, re.S):
+            res["links"] += 1
+            if re.sub(r"<[^>]+>", "", a).strip(): res["link_named"] += 1
+        for bt in re.findall(r"<button[^>]*>(.*?)</button>", b, re.S):
+            res["buttons"] += 1
+            if re.sub(r"<[^>]+>", "", bt).strip(): res["button_named"] += 1
+        for h in re.findall(r'href="([^"#?]+)"', t):
+            if h.startswith(("http", "mailto:")):
+                continue
+            if not (f.parent / h).resolve().exists():
+                res["dead"].append((str(f.relative_to(docs)), h))
+    return res
+
+
+def accessibility_html(css, docs, built_on):
+    cr = contrast_audit(css)
+    st = structure_audit(docs)
+    fails = [r for r in cr if not r[6]]
+
+    def row(r):
+        theme, tokn, kind, bg, val, need, ok = r
+        return (f'<tr><td>{theme}</td><td><code>--{tokn}</code></td><td>{kind}</td>'
+                f'<td>on {bg}</td><td class="n">{val:.2f}:1</td>'
+                f'<td class="n">{need:.1f}:1</td>'
+                f'<td class="{"y" if ok else "n0"}">{"pass" if ok else "FAIL"}</td></tr>')
+
+    # The verdict must account for EVERY table on this page, not just contrast.
+    # An earlier draft said "every measured check passes" while the structure
+    # table underneath it read 54/91 for heading structure. A statement that
+    # contradicts its own evidence is worse than no statement.
+    short = []
+    if fails:
+        short.append(f"{len(fails)} contrast check(s)")
+    if st["dead"]:
+        short.append(f"{len(st['dead'])} broken link(s)")
+    h1_short = st["pages"] - st["h1_one"]
+    if h1_short:
+        short.append(f"heading structure on {h1_short} page(s)")
+    main_short = st["pages"] - st["main"]
+    if main_short:
+        short.append(f"the main landmark on {main_short} page(s)")
+    if short:
+        verdict = ("<b>Contrast, naming and link integrity pass throughout.</b> "
+                   "Not everything does: " + ", ".join(short) +
+                   " fall short. Each is described under "
+                   "<a href=\"#known\">Known limitations</a> below.")
+    else:
+        verdict = "<b>Every check on this page passes.</b>"
+
+    known = []
+    if st["no_h1"]:
+        known.append(f'<li data-n="&#8226;"><b>{len(st["no_h1"])} pages have no level-1 heading.</b> '
+                     f'Their source begins at a second-level heading. '
+                     f'{", ".join("<code>%s</code>" % x for x in st["no_h1"])}</li>')
+    if st["multi_h1"]:
+        worst = max(st["multi_h1"], key=lambda x: x[1])
+        known.append(f'<li data-n="&#8226;"><b>{len(st["multi_h1"])} pages carry more than one level-1 '
+                     f'heading</b>, the slide decks among them &mdash; each slide is '
+                     f'marked as its own heading, so <code>{worst[0]}</code> has '
+                     f'{worst[1]}. Only one slide is visible at a time, but all of '
+                     f'them are in the page for a screen reader.</li>')
+    if st["no_main"]:
+        known.append(f'<li data-n="&#8226;"><b>{len(st["no_main"])} page has no main landmark:</b> '
+                     f'<code>{st["no_main"][0]}</code>. It is a starter template a '
+                     f'student fills in and publishes as their own work, so it '
+                     f'deliberately carries none of this site&rsquo;s structure.</li>')
+
+    return f"""<p class="lede">This site holds the student materials for {COURSE}.
+It is measured against <b>WCAG 2.2 Level AA</b> on every build, and this page is
+generated from those measurements rather than written by hand.</p>
+
+<h2 class="sec">What was measured</h2>
+<p>{built_on}. <b>{st['pages']} pages</b> were checked. {verdict}</p>
+
+<h2 class="sec">Contrast</h2>
+<p class="rvnote">Ratios computed from the stylesheet this site ships, against both
+surface colours, in both the light and dark themes. Text needs 4.5:1 (WCAG 1.4.3);
+the boundaries of controls need 3:1 (WCAG 1.4.11).</p>
+<div class="scroll"><table>
+<thead><tr><th>Theme</th><th>Token</th><th>Used for</th><th>Against</th>
+<th>Measured</th><th>Required</th><th>Result</th></tr></thead>
+<tbody>{''.join(row(r) for r in cr)}</tbody></table></div>
+
+<h2 class="sec">Structure and names</h2>
+<div class="scroll"><table>
+<thead><tr><th>Check</th><th>Criterion</th><th>Result</th></tr></thead><tbody>
+<tr><td>Page language declared</td><td>3.1.1</td><td class="n">{st['lang']} / {st['pages']}</td></tr>
+<tr><td>Page has a title</td><td>2.4.2</td><td class="n">{st['title']} / {st['pages']}</td></tr>
+<tr><td>Main landmark present</td><td>1.3.1</td><td class="n">{st['main']} / {st['pages']}</td></tr>
+<tr><td>Images carry alt text</td><td>1.1.1</td><td class="n">{st['img_alt']} / {st['imgs']}</td></tr>
+<tr><td>Links have discernible text</td><td>2.4.4</td><td class="n">{st['link_named']} / {st['links']}</td></tr>
+<tr><td>Buttons have an accessible name</td><td>4.1.2</td><td class="n">{st['button_named']} / {st['buttons']}</td></tr>
+<tr><td>Exactly one level-1 heading</td><td>1.3.1</td><td class="n">{st['h1_one']} / {st['pages']}</td></tr>
+<tr><td>Internal links resolve</td><td>&mdash;</td><td class="n">{len(st['dead'])} broken</td></tr>
+</tbody></table></div>
+
+<h2 class="sec">Keyboard and assistive technology</h2>
+<ul class="los">
+<li data-n="&#8226;">The week Overview / To Do control is a real tab list. Arrow keys,
+Home and End move between tabs; only the selected tab takes a tab stop.</li>
+<li data-n="&#8226;">Selected state is exposed with <code>aria-selected</code>, and each
+tab is tied to its panel with <code>aria-controls</code>.</li>
+<li data-n="&#8226;">With JavaScript off, no panel is hidden &mdash; both render in full,
+so nothing is lost.</li>
+<li data-n="&#8226;">Every interactive element takes a visible focus outline.</li>
+<li data-n="&#8226;">Movement is limited to a one-pixel hover shift, and that is
+disabled under <code>prefers-reduced-motion</code>.</li>
+<li data-n="&#8226;">Text reflows to a single column and the page does not scroll
+sideways; zoom is not disabled.</li>
+</ul>
+
+<h2 class="sec" id="known">Known limitations</h2>
+<ul class="los">{''.join(known) if known else
+ '<li data-n="&#8226;">None recorded at this build.</li>'}</ul>
+
+<h2 class="sec">What is not covered</h2>
+<p>These checks are automated. They do not establish that the writing is clear, that
+video and audio carry captions or transcripts, or that the site works well with a
+particular screen reader. Automated testing finds a minority of real barriers.
+<b>If something here does not work for you, that is worth reporting even if this
+page claims everything passes.</b></p>
+
+<h2 class="sec">Reporting a barrier</h2>
+<p><b>Tell your instructor.</b> You do not need to have registered accommodations,
+and you do not need to know which guideline is at issue &mdash; describing what you
+could not do is enough.</p>
+<p>Accommodations themselves, and access to course materials such as readings,
+video and equipment, are arranged through your institution&rsquo;s accessibility or
+disability services office.</p>
+"""
+
+
+
+def link_sections(doc):
+    """Give headings ids, then link table cells that name one.
+
+    Deliberately conservative. The glossary alone has 98 bold first-column
+    cells and almost all of them are terms, not sections — so a cell is linked
+    only when its text is EXACTLY a heading on the same page, or exactly a
+    heading minus a leading "Part ". Anything else is left as plain text.
+    """
+    heads = {}
+
+    def tag(m):
+        lvl, attrs, inner = m.group(1), m.group(2), m.group(3)
+        text = re.sub(r"<[^>]+>", "", inner).strip()
+        if not text:
+            return m.group(0)
+        hid = slugify(text)
+        if hid in heads.values():
+            n = 2
+            while f"{hid}-{n}" in heads.values():
+                n += 1
+            hid = f"{hid}-{n}"
+        heads[text] = hid
+        return f'<h{lvl}{attrs} id="{hid}">{inner}</h{lvl}>'
+
+    doc = re.sub(r"<h([1-6])([^>]*)>(.*?)</h\1>", tag, doc, flags=re.S)
+
+    lookup = {}
+    for text, hid in heads.items():
+        lookup[text] = hid
+        if text.lower().startswith("part "):
+            lookup[text[5:].strip()] = hid
+
+    def cell(m):
+        open_tag, inner, close = m.group(1), m.group(2), m.group(3)
+        if "<a " in inner:
+            return m.group(0)
+        text = re.sub(r"<[^>]+>", "", inner).strip()
+        hid = lookup.get(text)
+        if not hid:
+            return m.group(0)
+        return f'{open_tag}<a class="seclink" href="#{hid}">{inner}</a>{close}'
+
+    return re.sub(r"(<t[dh][^>]*>)(.*?)(</t[dh]>)", cell, doc, flags=re.S)
+
+
 def page(title, crumb, body, depth):
     up = "../" * depth
     return f"""<!doctype html>
@@ -399,7 +870,7 @@ def page(title, crumb, body, depth):
 </head>
 <body>
 <header class="bar">
-  <a class="home" href="{up}index.html"><b>{COURSE}</b> <span>{COURSE_LONG}</span></a>
+  <a class="home" href="{up}index.html">{HOME_ICON}<b>{COURSE}</b> <span>{COURSE_LONG}</span></a>
 </header>
 <main>
 {crumb}
@@ -407,7 +878,7 @@ def page(title, crumb, body, depth):
 </main>
 <footer>
   <p>{COURSE} &middot; {COURSE_LONG}</p>
-  <p class="fine">Student materials, generated from course source.</p>
+  <p class="fine">Student materials, generated from course source. <a href="{up}reference/accessibility.html">Accessibility</a></p>
 </footer>
 </body>
 </html>
@@ -440,16 +911,10 @@ def main():
                      if p.suffix.lower() in ('.svg', '.jpg', '.jpeg', '.png')) if (SRC / 'assets').is_dir() else []
     adir = SRC / 'assets'
     if adir.is_dir():
-        # Images only. The assets folder also holds instructor sheets — answer
-        # keys, the walkthrough schedule, contact lists — and copying it whole
-        # publishes them. Everything students get goes through collect(), where
-        # publishing is an explicit decision.
-        (DOCS / 'assets').mkdir(parents=True, exist_ok=True)
-        for a in adir.iterdir():
-            if a.suffix.lower() in ('.svg', '.jpg', '.jpeg', '.png', '.gif', '.webp'):
-                shutil.copy2(a, DOCS / 'assets' / a.name)
+        shutil.copytree(adir, DOCS / 'assets', dirs_exist_ok=True)
     standing_html = md_to_html(standing) if standing else ""
     kept = unwrapped = pages = 0
+    chromed = []
     index_rows = []
 
     for wdir, wnum, items in weeks:
@@ -468,6 +933,10 @@ def main():
                 shutil.copytree(f, DOCS / pathlib.PurePosixPath(out).parent,
                                 dirs_exist_ok=True,
                                 ignore=shutil.ignore_patterns("meta.json"))
+                for ix in (DOCS / pathlib.PurePosixPath(out).parent).rglob("index.html"):
+                    d = len(ix.relative_to(DOCS).parts) - 1
+                    if add_chrome(ix, d):
+                        chromed.append(str(ix.relative_to(DOCS)))
                 cards.append((os.path.relpath(out, wdir.name), label, override))
                 continue
             text = f.read_text()
@@ -479,7 +948,7 @@ def main():
                 f'<span>/</span><a href="index.html">Week {wnum}</a>'
                 f'<span>/</span><em>{html.escape(label)}</em></nav>'
             )
-            write(out, page(title, crumb, f'<article class="doc">{md_to_html(text)}</article>', 1))
+            write(out, page(title, crumb, f'<article class="doc">{link_sections(md_to_html(text))}</article>', 1))
             cards.append((os.path.relpath(out, wdir.name), label, title))
             pages += 1
 
@@ -489,7 +958,7 @@ def main():
             crumbd = (f'<nav class="crumb"><a href="../index.html">All weeks</a>'
                       f'<span>/</span><a href="index.html">Week {wnum}</a>'
                       f'<span>/</span><em>Slides</em></nav>')
-            dbody = (f'<h1>Week {wnum} slides<span class="sub">{html.escape(wtitle)}</span></h1>'
+            dbody = (f'<h1>Week {wnum} slides &middot; {html.escape(wtitle)}</h1>'
                      f'<p class="rvnote">What was on screen in class. '
                      f'Arrow keys or click to move.</p>'
                      f'<div class="deckwrap" id="deckwrap">'
@@ -540,8 +1009,16 @@ def main():
                    f'<p class="rvnote">From the lesson. Yours to keep &mdash; '
                    f'print them, mark them up.</p>{items}</section>')
 
-        body = (f'<h1>Week {wnum}<span class="sub">{html.escape(wtitle)}</span></h1>'
-                f'<ul class="cards">{lis}</ul>{dia}{rv}')
+        ol_path = wdir / "00-week-outline.md"
+        ov = overview_html(ol_path.read_text()) if ol_path.exists() else ""
+        hrs_label = f"{total:.2f} h" if rd else ""
+        td = todo_html(wnum, cards, hrs_label)
+
+        tabs = week_tabs(wnum, ov, td)
+        body = (f'<h1>Week {wnum} &middot; {html.escape(wtitle)}</h1>'
+                f'{tabs}'
+                f'<ul class="cards">{lis}</ul>{dia}{rv}'
+                f'{TABS_JS if tabs else ""}')
         write(f"{wdir.name}/index.html", page(f"Week {wnum}", crumb, body, 1))
         index_rows.append((wdir.name, wnum, wtitle, len(cards)))
         WEEK_TITLES[wnum] = wtitle
@@ -549,16 +1026,26 @@ def main():
 
     # review list — one page collecting every week's expectation
     if hours:
+        # A reading list may cover more weeks than the course has built. DSGN 114
+        # allocates fifteen weeks of review against seven week folders, which
+        # produced eight links to pages that do not exist. Keep the row -- the
+        # hours are real -- but only link a week that was actually built.
+        def _wk_cell(w):
+            title = html.escape(WEEK_TITLES.get(w, ""))
+            if (DOCS / f"week-{w:02d}" / "index.html").exists():
+                return f'<td><a href="../week-{w:02d}/index.html">{title}</a></td>'
+            return f'<td>{title}</td>'
+
         trs = "".join(
             f'<tr><td class="n">{w}</td>'
-            f'<td><a href="../week-{w:02d}/index.html">{html.escape(WEEK_TITLES.get(w, ""))}</a></td>'
+            f'{_wk_cell(w)}'
             f'<td class="n">{sum(float(v) for v in hours[w] if v and v[0].isdigit()):.2f} h</td></tr>'
             for w in sorted(hours))
         tot = sum(sum(float(v) for v in hours[w] if v and v[0].isdigit()) for w in hours)
         body = (
             '<h1>Review list<span class="sub">What to read, watch and listen to, week by week</span></h1>'
             '<p class="lede">Material is provided in class. This is on top of the lesson, the lab and '
-            'the assignment. Every week in this course sets review &mdash; the hours differ.</p>'
+            'the assignment. Weeks 12&ndash;15 set no review &mdash; those weeks are production.</p>'
             f'<div class="standing">{standing_html}'
             '<p class="gl">Terms are in the <a href="glossary.html">Glossary</a>, by module.</p></div>'
             '<h2 class="sec">Hours by week</h2>'
@@ -585,7 +1072,7 @@ def main():
         kept += st["kept"]; unwrapped += st["unwrapped"]
         crumb = ('<nav class="crumb"><a href="../index.html">Course home</a>'
                  f'<span>/</span><em>{html.escape(label)}</em></nav>')
-        write(out, page(title, crumb, f'<article class="doc">{md_to_html(text)}</article>', 1))
+        write(out, page(title, crumb, f'<article class="doc">{link_sections(md_to_html(text))}</article>', 1))
         ref_rows.append((out, label, blurb))
         pages += 1
 
@@ -603,9 +1090,25 @@ def main():
         f'<h1>{COURSE}<span class="sub">{COURSE_LONG}</span></h1>'
         f'<p class="lede">Everything to read, do and hand in — week by week.</p>'
         f'<h2 class="sec">Reference</h2><ul class="cards ref">{rf}</ul>'
-        f'<h2 class="sec">The {NUMBER_WORD.get(len(weeks), len(weeks))} weeks</h2><ul class="weeks">{wk}</ul>'
+        f'<h2 class="sec">The fifteen weeks</h2><ul class="weeks">{wk}</ul>'
     )
     write("index.html", page(COURSE, "", body, 0))
+    pages += 1
+
+    # Last, so it can audit everything else. Written twice: the first pass gives
+    # the page something to be, the second re-audits with it present so the page
+    # count it reports includes itself and is not quietly one short.
+    built_on = "Last checked " + datetime.date.today().strftime("%-d %B %Y")
+    crumb_a = ('<nav class="crumb"><a href="../index.html">Course home</a>'
+               '<span>/</span><em>Accessibility</em></nav>')
+    for _ in range(2):
+        css_now = (DOCS / "style.css").read_text()
+        write("reference/accessibility.html",
+              page("Accessibility",
+                   crumb_a,
+                   "<h1>Accessibility</h1>"
+                   + accessibility_html(css_now, DOCS, built_on),
+                   1))
     pages += 1
 
     print(f"pages          : {pages}")
@@ -613,7 +1116,45 @@ def main():
     print(f"reference docs : {len(ref_rows)}")
     print(f"links kept     : {kept}")
     print(f"links unwrapped: {unwrapped}  (targets not published)")
+    if chromed:
+        print(f"chromed        : {len(chromed)}  {', '.join(chromed)}")
     print(f"source         : {COURSE_DIR}")
+
+
+
+TABS_JS = """
+<script>
+(function(){
+  var w = document.querySelector('[data-tabs]');
+  if(!w) return;
+  var tabs = [].slice.call(w.querySelectorAll('[role=tab]')),
+      panels = [].slice.call(w.querySelectorAll('[role=tabpanel]'));
+  if(tabs.length < 2) return;
+  function show(n){
+    tabs.forEach(function(t,i){
+      var on = i === n;
+      t.classList.toggle('is-on', on);
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+      panels[i].hidden = !on;
+    });
+  }
+  tabs.forEach(function(t,i){
+    t.addEventListener('click', function(){ show(i); });
+    t.addEventListener('keydown', function(e){
+      var n = null;
+      if(e.key === 'ArrowRight') n = (i+1) % tabs.length;
+      if(e.key === 'ArrowLeft')  n = (i-1+tabs.length) % tabs.length;
+      if(e.key === 'Home') n = 0;
+      if(e.key === 'End')  n = tabs.length-1;
+      if(n === null) return;
+      e.preventDefault(); show(n); tabs[n].focus();
+    });
+  });
+  show(0);   // panels are unhidden in the markup, so JS-off shows both
+})();
+</script>
+"""
 
 
 DECK_JS = """
@@ -676,14 +1217,16 @@ DECK_JS = """
 STYLE = """
 :root{
   --ground:#E9E6DE; --panel:#F2F0EA; --ink:#1A1D1F;
-  --soft:rgba(26,29,31,.66); --faint:rgba(26,29,31,.45);
-  --rule:rgba(26,29,31,.16); --accent:#2F5D50; --alert:#7A3B52;
+  --soft:rgba(26,29,31,.82); --faint:rgba(26,29,31,.63);
+  --rule:rgba(26,29,31,.16); --edge:rgba(26,29,31,.49);
+  --accent:#2F5D50; --alert:#7A3B52;
 }
 @media (prefers-color-scheme:dark){
   :root{
     --ground:#15191A; --panel:#1D2223; --ink:#E9E6DE;
-    --soft:rgba(233,230,222,.66); --faint:rgba(233,230,222,.42);
-    --rule:rgba(233,230,222,.16); --accent:#7FB3A0; --alert:#C98BA0;
+    --soft:rgba(233,230,222,.80); --faint:rgba(233,230,222,.52);
+    --rule:rgba(233,230,222,.16); --edge:rgba(233,230,222,.38);
+    --accent:#7FB3A0; --alert:#C98BA0;
   }
 }
 *{box-sizing:border-box}
@@ -697,11 +1240,16 @@ a{color:var(--accent)}
 a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 
 .bar{border-bottom:1px solid var(--rule);background:var(--panel)}
-.home{display:block;max-width:52rem;margin:0 auto;padding:.9rem clamp(1rem,4vw,2rem);
-  text-decoration:none;color:var(--ink)}
-.home span{color:var(--faint);margin-left:.5rem;font-size:.9rem}
+.home{display:flex;align-items:baseline;gap:.55rem;max-width:80ch;margin:0 auto;
+  padding:.9rem clamp(1rem,4vw,2rem);text-decoration:none;color:var(--ink)}
+.home span{color:var(--faint);font-size:.9rem}
+.hico{flex:none;align-self:center;color:var(--accent);transition:transform .12s}
+.home:hover .hico{transform:translateY(-1px)}
+.home:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:2px}
+@media (prefers-reduced-motion:reduce){.hico{transition:none}.home:hover .hico{transform:none}}
+@media(max-width:26rem){.home span{display:none}}
 
-main{max-width:52rem;margin:0 auto;padding:clamp(1.4rem,5vw,3rem) clamp(1rem,4vw,2rem)}
+main{max-width:80ch;margin:0 auto;padding:clamp(1.4rem,5vw,3rem) clamp(1rem,4vw,2rem)}
 
 .crumb{display:flex;flex-wrap:wrap;gap:.45rem;align-items:center;
   font-size:.82rem;color:var(--faint);margin-bottom:1.6rem}
@@ -712,15 +1260,23 @@ h1{font-size:clamp(1.8rem,5.5vw,2.7rem);line-height:1.12;letter-spacing:-.022em;
   margin:0 0 1.3rem;text-wrap:balance}
 h1 .sub{display:block;font-size:.46em;font-weight:400;color:var(--soft);
   margin-top:.5rem;letter-spacing:0}
+/* Week headings are a single line at one level: "Week 1 · Visual literacy".
+   No lighter tail, and deliberately not nowrap -- a long topic must wrap on a
+   phone rather than overflow. */
 .lede{font-size:1.06rem;color:var(--soft);max-width:44ch;margin:0 0 2.4rem}
-h2.sec{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--faint);font-weight:400;margin:2.4rem 0 .8rem}
-h2.sec:first-of-type{margin-top:0}
+h2.sec{font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink);font-weight:600;margin:3rem 0 1rem;
+  padding-top:1.3rem;border-top:1px solid var(--rule)}
+/* Only drop the separation when the heading genuinely opens its container.
+   :first-of-type fired on "Hours by week" and "Reference", which follow an h1
+   and a lede, so both lost their top margin while sitting mid-page. */
+h2.sec:first-child{margin-top:0;padding-top:0;border-top:0}
 
 ul.weeks,ul.cards{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.5rem}
 ul.weeks a,ul.cards a{display:flex;gap:1rem;align-items:baseline;padding:.9rem 1.1rem;
-  background:var(--panel);border:1px solid var(--rule);text-decoration:none;color:var(--ink)}
-ul.weeks a:hover,ul.cards a:hover{border-color:var(--accent)}
+  background:var(--panel);border:1px solid var(--edge);text-decoration:none;color:var(--ink)}
+ul.weeks a:hover,ul.cards a:hover{border-color:var(--accent);color:var(--accent)}
+ul.weeks a:focus-visible,ul.cards a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .wk{font-variant-numeric:tabular-nums;color:var(--accent);font-weight:700;min-width:2ch}
 .t{flex:1;min-width:0}
 .c{color:var(--faint);font-size:.85rem}
@@ -729,11 +1285,11 @@ ul.weeks .c{white-space:nowrap}
 
 .review{margin-top:2.4rem;border-top:1px solid var(--rule);padding-top:1.4rem}
 .review h2{display:flex;flex-wrap:wrap;gap:.6rem;align-items:baseline;
-  font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--faint);font-weight:400;margin:0 0 .5rem}
+  font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink);font-weight:600;margin:0 0 .5rem}
 .review .hrs{color:var(--accent);font-weight:700;letter-spacing:0;
   text-transform:none;font-size:1rem;font-variant-numeric:tabular-nums}
-.rvnote{color:var(--faint);font-size:.86rem;margin:0 0 1rem;max-width:52ch}
+.rvnote{color:var(--faint);font-size:.86rem;margin:0 0 1rem;max-width:80ch}
 .deck{border:1px solid var(--rule);background:var(--panel);
   min-height:22rem;display:flex;cursor:pointer}
 .deck:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
@@ -823,9 +1379,48 @@ body.presenting{overflow:hidden}
 .dhud button:disabled{opacity:.35;cursor:default}
 .dhud span{font-size:.85rem;color:var(--soft);font-variant-numeric:tabular-nums}
 
+
+.tabs{margin:0 0 1.9rem}
+.tabstrip{display:flex;gap:.35rem;border-bottom:1px solid var(--edge);margin-bottom:1.2rem}
+.tab{appearance:none;background:none;border:0;border-bottom:2px solid transparent;
+  margin-bottom:-1px;padding:.5rem .85rem;cursor:pointer;font:inherit;
+  font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--faint);transition:color .12s,border-color .12s}
+.tab:hover{color:var(--ink)}
+.tab.is-on{color:var(--accent);border-bottom-color:var(--accent)}
+.tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+
+.tabpanel p{font-size:.98rem;color:var(--soft);max-width:80ch;margin:0 0 .85rem}
+.tabpanel strong{color:var(--ink)}
+.tabpanel .lolead{font-size:.86rem;color:var(--faint);margin:1.1rem 0 .5rem}
+ul.los{list-style:none;margin:0 0 1rem;padding:0;display:flex;flex-direction:column;gap:.42rem}
+ul.los li{font-size:.93rem;color:var(--soft);max-width:80ch;padding-left:2.6rem;position:relative}
+ul.los li::before{content:attr(data-n);position:absolute;left:0;top:.1em;
+  font-size:.72rem;letter-spacing:.06em;color:var(--accent);font-variant-numeric:tabular-nums}
+.asmt{border-left:3px solid var(--accent);padding-left:.9rem;font-size:.9rem;
+  color:var(--soft);margin:0}
+.asmt span{display:block;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--faint);margin-bottom:.15rem}
+.tabpanel ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.5rem}
+.tabpanel ol li{display:flex;gap:1rem;align-items:baseline;font-size:.94rem;color:var(--soft)}
+.tabpanel ol li a{display:inline-flex;align-items:center;gap:.5rem;
+  padding:.4rem .8rem;border:1px solid var(--edge);border-radius:2px;
+  background:var(--panel);color:var(--ink);text-decoration:none;
+  min-height:2.2rem;transition:border-color .12s,color .12s}
+.tabpanel ol li a:hover{border-color:var(--accent);color:var(--accent)}
+.tabpanel ol li a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.tabpanel ol li>span:not(.v){padding:.4rem 0}
+@media (prefers-reduced-motion:reduce){.tabpanel ol li a{transition:none}}
+.tabpanel .v{color:var(--accent);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;
+  min-width:9ch;flex:none}
+@media(max-width:34rem){
+  .tabpanel ol li{flex-direction:column;gap:.15rem}
+  .tab{padding:.5rem .6rem}
+}
+
 .diagrams{margin-top:2.4rem;border-top:1px solid var(--rule);padding-top:1.4rem}
-.diagrams h2{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--faint);font-weight:400;margin:0 0 .5rem}
+.diagrams h2{font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink);font-weight:600;margin:0 0 .5rem}
 .diagrams figure{margin:0 0 1.2rem}
 .diagrams img{display:block;width:100%;max-width:100%;height:auto;
   background:#E9E6DE;border:1px solid var(--rule)}
@@ -833,7 +1428,7 @@ body.presenting{overflow:hidden}
 
 .standing{border-left:3px solid var(--accent);padding-left:1.1rem;margin-top:1rem}
 .standing blockquote{margin:0;padding:0;border:0}
-.standing p{margin:0 0 .7rem;font-size:.95rem;color:var(--soft);max-width:62ch}
+.standing p{margin:0 0 .7rem;font-size:.95rem;color:var(--soft);max-width:80ch}
 .standing p:last-child{margin-bottom:0}
 .standing .gl{margin-top:.9rem;font-size:.9rem}
 .standing strong{color:var(--ink)}
@@ -842,7 +1437,11 @@ body.presenting{overflow:hidden}
 .doc h1{font-size:clamp(1.7rem,5vw,2.4rem)}
 .doc h2{font-size:1.35rem;line-height:1.25;margin:2.4rem 0 .8rem;letter-spacing:-.012em}
 .doc h3{font-size:1.1rem;margin:1.8rem 0 .6rem}
-.doc p,.doc li{max-width:64ch}
+.doc p,.doc li{max-width:80ch}
+.doc h1,.doc h2,.doc h3{scroll-margin-top:1.5rem}
+.seclink{color:inherit;text-decoration:none;border-bottom:1px solid var(--edge)}
+.seclink:hover{color:var(--accent);border-bottom-color:var(--accent)}
+.seclink:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .doc ul,.doc ol{padding-left:1.3rem}
 .doc li{margin:.35rem 0}
 .doc hr{border:0;border-top:1px solid var(--rule);margin:2.2rem 0}
@@ -861,7 +1460,7 @@ body.presenting{overflow:hidden}
 .doc img{max-width:100%;height:auto}
 
 footer{border-top:1px solid var(--rule);margin-top:4rem;padding:1.6rem clamp(1rem,4vw,2rem) 3rem}
-footer p{max-width:52rem;margin:0 auto;color:var(--faint);font-size:.85rem}
+footer p{max-width:80ch;margin:0 auto;color:var(--faint);font-size:.85rem}
 footer .fine{margin-top:.3rem}
 
 @media (max-width:34rem){
