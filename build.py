@@ -137,6 +137,78 @@ def parse_check(chunk, screen):
     return {"answer": key.group(1), "opts": opts, "fb": fb}, "\n".join(kept).strip()
 
 
+
+def build_deck_dashed(wdir, wnum, wtitle):
+    """The DSGN-family deck source.
+
+    Slides are separated by `---`, each carrying one or more `##` headings, and
+    the instructor's script sits in blockquotes. The source states the contract
+    itself: "Speaker notes in blockquotes are not projected." Every line
+    beginning with `>` is therefore dropped before anything is rendered — 203
+    such lines across the three courses, none of them using lazy continuation,
+    so the rule is complete rather than approximate.
+
+    Two shapes share this parser. DSGN 312 and 412, and week 1 of 498, separate
+    slides with `---`. From week 2 on, 498 uses one rule under the front matter
+    and then numbered headings -- "## 1 · Title". Both are handled here.
+
+    These decks carry no images, asset tags or embedded video, so there is no
+    media column to build.
+    """
+    spec = wdir / "02-slides.md"
+    if not spec.exists():
+        return None
+    raw = spec.read_text()
+    parts = re.split(r"^---\s*$", raw, flags=re.M)
+    if len(parts) >= 3:
+        chunks = parts[1:]                       # parts[0] is the front matter
+    else:
+        # DSGN 498 from week 2 on: one rule under the front matter, then slides
+        # delimited by numbered headings -- "## 1 · Title", "## 2 · ...".
+        tail = parts[-1] if len(parts) > 1 else raw
+        chunks = re.split(r"^(?=##\s+\d+\s*·)", tail, flags=re.M)
+        chunks = [c for c in chunks if re.match(r"^##\s+\d+\s*·", c.strip())]
+    if not chunks:
+        return None
+
+    titles, screens = [], []
+    for chunk in chunks:
+        kept = [l for l in chunk.split("\n") if not l.lstrip().startswith(">")]
+        text = "\n".join(kept).strip()
+        if not text:
+            continue
+        h = re.search(r"^#{1,6}\s+(.*)$", text, re.M)
+        t = h.group(1).strip() if h else f"Slide {len(titles) + 1}"
+        titles.append(re.sub(r"^\d+\s*·\s*", "", t))
+        screens.append(text)
+    if not screens:
+        return None
+
+    rendered = md_to_html(f"\n\n{SLIDE_SPLIT}\n\n".join(screens),
+                          fmt="gfm+hard_line_breaks")
+    rendered = re.sub(r"</?(?:em|i)>", "", rendered)   # slides are not italicised
+    frags = rendered.split(SLIDE_SPLIT)
+
+    # The eyebrow has its slide number stripped ("1 · Title" -> "Title"), so the
+    # heading must be stripped the same way before comparing, or every numbered
+    # slide renders its title twice.
+    norm = lambda x: re.sub(r"[^a-z0-9]", "",
+                            re.sub(r"^\s*\d+\s*·\s*", "", x).lower())
+    cards = []
+    for i, (title, frag) in enumerate(zip(titles, frags)):
+        first = re.search(r"<h[1-6][^>]*>(.*?)</h[1-6]>", frag, re.S)
+        dup = first and norm(re.sub(r"<[^>]+>", "", first.group(1))) == norm(title)
+        eyebrow = "" if dup else f'<h2>{html.escape(title)}</h2>'
+        # The slide counter already numbers the slide, so "1 · Title" in the
+        # heading numbers it twice.
+        frag = re.sub(r"(<h[1-6][^>]*>)\s*\d+\s*·\s*", r"\1", frag, count=1)
+        cards.append(f'<section class="slide">'
+                     f'<div class="stext"><p class="sn">{i + 1} / {len(titles)}</p>'
+                     f'{eyebrow}<div class="sbody">{frag}</div></div>'
+                     f'</section>')
+    return "\n".join(cards), len(titles)
+
+
 def build_deck(wdir, wnum, wtitle, asset_files):
     """Student-visible slides: the ON SCREEN layer only.
 
@@ -149,7 +221,8 @@ def build_deck(wdir, wnum, wtitle, asset_files):
     body = spec.read_text()
     chunks = re.split(r"^## Slide ", body, flags=re.M)[1:]
     if not chunks:
-        return None
+        # No "## Slide N" headings: this is the dashed DSGN format.
+        return build_deck_dashed(wdir, wnum, wtitle)
 
     titles, screens, assets, checks = [], [], [], []
     for c in chunks:
