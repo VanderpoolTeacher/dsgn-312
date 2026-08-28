@@ -346,6 +346,14 @@ def parse_review():
             text, re.M):
         hours[int(w)] = (rd.strip(), vw.strip())
 
+    links = {}
+    for wnum, body in re.findall(r"^### Week (\d{1,2}) —(.*?)(?=^### |^## |\Z)",
+                                 text, re.M | re.S):
+        found = re.findall(r"^- \[([^\]]+)\]\((https?://[^)]+)\)(?: · (.+))?$",
+                           body, re.M)
+        if found:
+            links[int(wnum)] = found
+
     standing = ""
     m = re.search(r"^## What students do — every week\s*(.*?)^Terms are in", text, re.M | re.S)
     if m:
@@ -354,7 +362,21 @@ def parse_review():
             for l in m.group(1).strip().split("\n")
             if not l.startswith("**This instruction")
         ).strip()
-    return hours, standing
+    return hours, standing, links
+
+
+def rvlinks_html(wnum, rvlinks):
+    """Named review material for one week, where titles are fixed rather than chosen."""
+    items = rvlinks.get(wnum)
+    if not items:
+        return ""
+    lis = "".join(
+        f'<li><a href="{html.escape(url)}" target="_blank" rel="noopener">'
+        f'{html.escape(title)}</a>'
+        + (f' &middot; {html.escape(by)}' if by else "")
+        + "</li>"
+        for title, url, by in items)
+    return f'<ul class="rvlist">{lis}</ul>'
 
 
 def collect():
@@ -977,7 +999,7 @@ def main():
     STYLE_V = hashlib.md5(STYLE.encode()).hexdigest()[:8]
 
     pub, weeks = collect()
-    hours, standing = parse_review()
+    hours, standing, rvlinks = parse_review()
     WEEK_TITLES = {}
     assets = parse_assets()
     asset_names = sorted(p.name for p in (SRC / 'assets').iterdir()
@@ -1062,7 +1084,8 @@ def main():
                   f'<span class="hrs">{total:.2f} h</span></h2>'
                   f'<p class="rvnote">Material is provided in class. This is on top of the '
                   f'lesson, the lab and the assignment.</p>'
-                  f'<div class="standing">{standing_html}'
+                  + rvlinks_html(wnum, rvlinks)
+                  + f'<div class="standing">{standing_html}'
                   f'<p class="gl">Terms are in the '
                   f'<a href="../reference/glossary.html">Glossary</a>, by module.</p>'
                   f'</div></section>')
